@@ -14,7 +14,7 @@ struct Node{
   Node* next = NULL;
 };
 
-void addStudent(Node* table[], int &currentID, Node* newPoint);
+void addStudent(Node* table[], int &currentID);
 
 void print(Node* table[], int size);
 
@@ -42,19 +42,14 @@ int main(){
   while(!quit){
     cout << "Type a valid command(ADD, PRINT, DELETE, QUIT)" << endl;//Prompt user for input
     size = sizeof(table)/sizeof(table[0]);
+    cout << size << endl;
     cin >> input;
     if(strcmp(input,"ADD") == 0){//If user wants to add
-      Node* n = new Node();
-      cout << sizeof(table) << endl;
-      addStudent(table, currentID, n);
-      cout << "AFTER" << endl;
-      cout << sizeof(table) << endl;
+      addStudent(table, currentID);
     }
     else if(strcmp(input,"PRINT") == 0){//If user wants to print
       cout << sizeof(table) << endl;
       print(table, size);
-      cout << "AFTER" << endl;
-      cout << sizeof(table) << endl;
     }
     else if(strcmp(input,"DELETE") == 0){//If user wants to delete
       remove(table);
@@ -66,14 +61,13 @@ int main(){
  
   return 0;
 }
-void addStudent(Node* table[], int &currentID, Node* newPoint){
+void addStudent(Node* table[], int &currentID){
+  Node* newPoint = new Node();
   strcpy(newPoint->firstName, "K");
   strcpy(newPoint->lastName, "R");
   newPoint->id = currentID;
-  currentID++;
   newPoint->gpa = 4.12;
-  
-  table[100%currentID] = newPoint;
+  table[(currentID%100)] = newPoint;
   currentID++;
   return;
 }
