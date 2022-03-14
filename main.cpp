@@ -14,41 +14,41 @@ struct Node{
   Node* next = NULL;
 };
 
-void addStudents(Node* table[], int &currentID, int size);
+Node** addStudents(Node** table, int &currentID, int &size);
 
-void print(Node* table[], int size);
+void printAll(Node** table, int size);
 
-void remove(Node* table[]);
+void print(Node** table, int size);
+
+void remove(Node** table, int size);
 
 void reset(Node* table[], int size);
 
 void printChain(Node* current);
 
-Node** rehash(Node* table[], Node* new_table[], int &size, int currentID);
+Node** rehash(Node** table, Node** new_table, int &size, int currentID);
   
 int main(){
   srand(time(0));
   bool quit = false;//bool to check when user wants to quit
-  Node* table[10];
+  Node** table = new Node*[100];
   char input[7];
   int currentID = 0;
-  int size = sizeof(table)/sizeof(table[0]);
-  cout << size << endl;
+  int size = 100;
   reset(table, size);
   while(!quit){
     cout << "Type a valid command(ADD, PRINT, DELETE, QUIT)" << endl;//Prompt user for input
-    size = sizeof(table)/sizeof(table[0]);
-    //cout << size << endl;
     cin >> input;
     if(strcmp(input,"ADD") == 0){//If user wants to add
-      addStudents(table, currentID, size);
+      table = addStudents(table, currentID, size);
     }
     else if(strcmp(input,"PRINT") == 0){//If user wants to print
       //cout << sizeof(table) << endl;
+      printAll(table, size);
       print(table, size);
     }
     else if(strcmp(input,"DELETE") == 0){//If user wants to delete
-      remove(table);
+      remove(table, size);
     }
     else if(strcmp(input,"QUIT") == 0){//If user wants to quit
       quit = true;
@@ -57,7 +57,7 @@ int main(){
  
   return 0;
 }
-void addStudents(Node* table[], int &currentID, int size){
+Node** addStudents(Node** table, int &currentID, int &size){
   int students;
   cout << "How many students do you want to add" << endl;
   cin >> students;
@@ -113,68 +113,94 @@ void addStudents(Node* table[], int &currentID, int size){
 	  table[currentID%size]->next->next = newPoint;
 	}
 	else{
-	  Node* new_table[size*2];
+	  Node** new_table = new Node*[size*2];
 	  reset(new_table, size*2);
 	  table = rehash(table, new_table, size, currentID);
-	  cout << endl << endl << endl << endl << endl;
 	  table[currentID%size]->next = newPoint;
-	  print(table, size);
 	}
       }
     }
     currentID++;
   }
   
-  return;
+  return table;
 }
 
-Node** rehash(Node* table[], Node* new_table[], int &size, int currentID){
+Node** rehash(Node** table, Node** new_table, int &size, int currentID){
   int oldSize= size;
   size = size*2;
-  for(int i = 0; i < currentID; i++){ 
-    
+  for(int i = 0; i < currentID; i++){
     if(i < oldSize){
-      cout << "here" << endl;
       new_table[(i%size)] = table[(i)%oldSize];
+      
     }
     else if(i < oldSize*2){
-      cout << "here2" << endl;
-	new_table[(i%size)] = table[(i)%oldSize]->next;
+      new_table[(i%size)] = table[(i)%oldSize]->next;
     }
     else{
-      cout << i << endl;
       new_table[i%size]->next = table[(i)%oldSize]->next->next;
     }
-    if(i > oldSize){
-      new_table[(i%size)]->next = NULL;
-    }
   }
-  print(new_table, size);
+  for(int i = size/2; i < size; i++){
+    new_table[(i%size)]->next = NULL;
+  }
   return new_table;
 }
 
-void print(Node* table[], int size){
+void printAll(Node** table, int size){
   for(int i = 0; i < size; i++){
     printChain(table[i]);
   }
   return;
 }
 
+void print(Node** table, int size){
+  int i;
+  Node* current;
+  cout << "What is the ID# of the student you wish to print?" << endl;
+  cin >> i;
+  cin.clear();
+ 
+  if(table[i%size]->id == i){
+    current = table[i%size];
+  }
+  else if(table[i%size]->next->id == i){
+    current = table[i%size]->next;
+  }
+  else if(table[i%size]->next->next->id == i){
+    current = table[i%size]->next->next;
+  }
+  cout << current->firstName << " " << current->lastName << " GPA: " << current->gpa << " " << current->id << endl;
+}
+
 void printChain(Node* current){
   if(current != NULL){
     //cout << "here" << endl;
-    cout << current->firstName << " " << current->lastName << " GPA: " << current->gpa << " " << current->id << endl;
+    cout << current->firstName << " " << current->lastName << " GPA: " <<  fixed << setprecision(2) << current->gpa << " ID: " << current->id << endl;
     printChain(current->next);
   }
   return;
 }
 
 
-void remove(Node* table[]){
+void remove(Node** table, int size){
+  int i;
+  cout << "What is the ID# of the student you wish to remove?" << endl;
+  cin >> i;
+  cin.clear();
+  if(table[i%size]->id == i){
+    table[i%size] = table[i%size]->next;
+  }
+  else if(table[i%size]->next->id == i){
+    table[i%size]->next = table[i%size]->next->next;
+  }
+  else if(table[i%size]->next->next->id == i){
+    table[i%size]->next->next = NULL;
+  }
   return;
 }
 
-void reset(Node* table[], int size){
+void reset(Node** table, int size){
   for(int i = 0; i < size; i++){
     table[i] = NULL;
   }
