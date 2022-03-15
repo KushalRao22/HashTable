@@ -25,6 +25,7 @@ struct Node{//Struct to hold values
 };
 //Methods
 Node** addStudents(Node** table, int &currentID, int &size);
+Node** manadd(Node** table, int &currentID, int &size);
 void printAll(Node** table, int size);
 void print(Node** table, int size);
 void remove(Node** table, int size);
@@ -41,10 +42,16 @@ int main(){
   int size = 100;
   reset(table, size);//Set all values in the table to NULL
   while(!quit){
-    cout << "Type a valid command(ADD, PRINT, DELETE, QUIT)" << endl;//Prompt user for input
+    cout << "Type a valid command(ADD, MADD, PRINT, ALL(PRINT ALL), DELETE, QUIT)" << endl;//Prompt user for input
     cin >> input;
+    if(strcmp(input, "MADD") == 0){
+      table = manadd(table, currentID, size);
+    }
     if(strcmp(input,"ADD") == 0){//If user wants to add students
       table = addStudents(table, currentID, size);
+    }
+    else if(strcmp(input, "ALL")==0){
+      printAll(table, size);
     }
     else if(strcmp(input,"PRINT") == 0){//If user wants to print a specific student
       print(table, size);
@@ -167,15 +174,20 @@ void print(Node** table, int size){
   cin >> i;
   cin.clear();
   //Get right student
-  if(table[i%size]->id == i){
+  if(table[i%size] != NULL && table[i%size]->id == i){
     current = table[i%size];
   }
-  else if(table[i%size]->next->id == i){
+  else if(table[i%size]!= NULL && table[i%size]->next != NULL && table[i%size]->next->id == i){
     current = table[i%size]->next;
   }
-  else if(table[i%size]->next->next->id == i){
+  else if(table[i%size]!= NULL && table[i%size]->next != NULL && table[i%size]->next->next != NULL && table[i%size]->next->next->id == i){
     current = table[i%size]->next->next;
   }
+  else{
+    cout << "Not valid ID" << endl;
+    return;
+  }
+  cout << "here" << endl;
   //Print out name GPA and ID
     cout << current->firstName << " " << current->lastName << " GPA: " <<  fixed << setprecision(2) << current->gpa << " ID: " << current->id << endl;
 }
@@ -210,4 +222,48 @@ void reset(Node** table, int size){
   for(int i = 0; i < size; i++){
     table[i] = NULL;
   }
+}
+//Maually add student
+Node** manadd(Node** table, int &currentID, int &size){
+  char input[100];
+  char firstName[100];
+  char lastName[100];
+  float gpa;
+  Node* newPoint = new Node();
+  cout << "First name:" << endl;
+  cin >> firstName;
+  cin.clear();
+  cout << "Last name:" << endl;
+  cin >> lastName;
+  cin.clear();
+  cout << "GPA: " << endl;
+  cin >> gpa;
+  cin.clear();
+//Add name and GPA to the node
+  strcpy(newPoint->firstName, firstName);
+  strcpy(newPoint->lastName, lastName);
+  newPoint->id = currentID;
+  newPoint->gpa = gpa;
+  //Add student to the right place
+  if(table[(currentID)%size] == NULL){//If there are no collisions
+    table[(currentID%size)] = newPoint;//Add the new student to the hash table
+  }
+  else{
+    if(table[(currentID)%size]->next == NULL){//If there is 1 collision
+      table[currentID%size]->next = newPoint;//Add the new student to the hash table
+    }
+    else{
+      if(table[(currentID)%size]->next->next == NULL){//If there is 2 collisions
+	table[currentID%size]->next->next = newPoint;//Add the new student to the hash table
+      }
+      else{//If there is 3 create new table
+	Node** new_table = new Node*[size*2];//New table twice the size
+	reset(new_table, size*2);//Set all new table values to NULL
+	table = rehash(table, new_table, size, currentID);//Add values to new table
+	table[currentID%size]->next = newPoint;//Add the new student to the hash table
+      }
+    }
+  }
+  currentID++;
+  return table;
 }
